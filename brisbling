@@ -1,5 +1,14 @@
 local DeviceType = game:GetService("UserInputService").TouchEnabled and "Mobile" or "PC"
 if DeviceType == "Mobile" then
+    local player = game:GetService("Players").LocalPlayer
+    local playerGui = player:FindFirstChildOfClass("PlayerGui")
+
+    if not playerGui then
+        warn("PlayerGui not found!")
+        return
+    end
+
+    -- GUI Elements
     local ClickButton = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
     local ImageLabel = Instance.new("ImageLabel")
@@ -7,8 +16,9 @@ if DeviceType == "Mobile" then
     local UICorner = Instance.new("UICorner")
     local UICorner_2 = Instance.new("UICorner")
 
+    -- GUI Setup
     ClickButton.Name = "ClickButton"
-    ClickButton.Parent = game.CoreGui
+    ClickButton.Parent = playerGui
     ClickButton.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     MainFrame.Name = "MainFrame"
@@ -46,99 +56,70 @@ if DeviceType == "Mobile" then
     TextButton.TextColor3 = Color3.new(220, 125, 255)
     TextButton.TextSize = 20
 
-game:GetService("Players").LocalPlayer.Idled:Connect(function()
-    game:GetService("VirtualUser"):CaptureController()
-    game:GetService("VirtualUser"):ClickButton1(Vector2.new())
-    game:GetService("VirtualUser"):ClickButton2(Vector2.new())
-end)
-if game.Workspace:FindFirstChild("KIllAllPart") then
-    game.Workspace.KIllAllPart:Destroy()
-end
-local part = Instance.new("Part")
-part.Parent = game.Workspace
-part.Name = "KIllAllPart"
-part.Position = Vector3.new(0, 10000, 0)
-part.Size = Vector3.new(1000, 10, 1000)
-part.Anchored = true
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
-TextButton.MouseButton1Click:Connect(function()
-    game:GetService("VirtualInputManager"):SendKeyEvent(true, "RightControl", false, game)
-    game:GetService("VirtualInputManager"):SendKeyEvent(false, "RightControl", false, game)
-end)
-end
-ESP:Toggle(true)
-ESP.Tracers = false
-ESP.Names = false
-ESP.Boxes = false
-ESP.Players = false
-ESP.Color = Color3.fromRGB(255, 255, 255)
-local Window = Fluent:CreateWindow({
-    Title = "Beamed v2 Fluent version",
-    SubTitle = "Made by Ben1x1x1x1x",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(500, 460),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.Minus
-})
----addtab
-local Tabs = {
-    Main = Window:AddTab({
-        Title = "Main",
-        Icon = "contact"
-    }),
-    Rock = Window:AddTab({
-        Title = "Rock",
-        Icon = "aperture"
-    }),
-    Lift = Window:AddTab({
-        Title = "Dead Lift",
-        Icon = "skull"
-    }),
-    Squat = Window:AddTab({
-        Title = "Squat Rack",
-        Icon = "separator-horizontal"
-    }),
-    Bench = Window:AddTab({
-        Title = "Bench Press",
-        Icon = "git-commit"
-    }),
-    Pull = Window:AddTab({
-        Title = "Pull Ups",
-        Icon = "swiss-franc"
-    }),
-    Throw = Window:AddTab({
-        Title = "Boulder Throw",
-        Icon = "life-buoy"
-    }),
-    Tread = Window:AddTab({
-        Title = "Treadmill",
-        Icon = "activity"
-    }),
-    Teleport = Window:AddTab({
-        Title = "Teleport",
-        Icon = "venetian-mask"
-    }),
-    Shop = Window:AddTab({
-        Title = "Shop",
-        Icon = "wallet"
-    }),
-    Esp = Window:AddTab({
-        Title = "Esp",
-        Icon = "rss"
-    }),
-    Misc = Window:AddTab({
-        Title = "Misc",
-        Icon = "more-horizontal"
-    }),
-    Settings = Window:AddTab({
-        Title = "Settings",
-        Icon = "settings"
+    -- Prevent Player Idle
+    game:GetService("Players").LocalPlayer.Idled:Connect(function()
+        game:GetService("VirtualUser"):CaptureController()
+        game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+    end)
+
+    -- KillAllPart Creation
+    if game.Workspace:FindFirstChild("KIllAllPart") then
+        game.Workspace.KIllAllPart:Destroy()
+    end
+    local part = Instance.new("Part")
+    part.Parent = game.Workspace
+    part.Name = "KIllAllPart"
+    part.Position = Vector3.new(0, 10000, 0)
+    part.Size = Vector3.new(1000, 10, 1000)
+    part.Anchored = true
+
+    -- Fluent Library and ESP
+    local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+    local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+    local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+    local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
+
+    TextButton.MouseButton1Click:Connect(function()
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, "RightControl", false, game)
+        game:GetService("VirtualInputManager"):SendKeyEvent(false, "RightControl", false, game)
+    end)
+
+    -- ESP Configuration
+    ESP:Toggle(true)
+    ESP.Tracers = false
+    ESP.Names = false
+    ESP.Boxes = false
+    ESP.Players = false
+    ESP.Color = Color3.fromRGB(255, 255, 255)
+
+    -- Fluent Window and Tabs
+    local Window = Fluent:CreateWindow({
+        Title = "Beamed v2 Fluent version",
+        SubTitle = "Made by Ben1x1x1x1x",
+        TabWidth = 160,
+        Size = UDim2.fromOffset(500, 460),
+        Acrylic = true,
+        Theme = "Dark",
+        MinimizeKey = Enum.KeyCode.Minus
     })
-}
+
+    local Tabs = {
+        Main = Window:AddTab({ Title = "Main", Icon = "contact" }),
+        Rock = Window:AddTab({ Title = "Rock", Icon = "aperture" }),
+        Lift = Window:AddTab({ Title = "Dead Lift", Icon = "skull" }),
+        Squat = Window:AddTab({ Title = "Squat Rack", Icon = "separator-horizontal" }),
+        Bench = Window:AddTab({ Title = "Bench Press", Icon = "git-commit" }),
+        Pull = Window:AddTab({ Title = "Pull Ups", Icon = "swiss-franc" }),
+        Throw = Window:AddTab({ Title = "Boulder Throw", Icon = "life-buoy" }),
+        Tread = Window:AddTab({ Title = "Treadmill", Icon = "activity" }),
+        Teleport = Window:AddTab({ Title = "Teleport", Icon = "venetian-mask" }),
+        Shop = Window:AddTab({ Title = "Shop", Icon = "wallet" }),
+        Esp = Window:AddTab({ Title = "Esp", Icon = "rss" }),
+        Misc = Window:AddTab({ Title = "Misc", Icon = "more-horizontal" }),
+        Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    }
+end
+
 ---main
 local tool = Tabs.Main:AddDropdown("SelectTool Dropdown", {
     Title = "Select Tool",
