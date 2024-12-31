@@ -45,7 +45,6 @@ if DeviceType == "Mobile" then
     TextButton.Text = ""
     TextButton.TextColor3 = Color3.new(220, 125, 255)
     TextButton.TextSize = 20
-
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
     game:GetService("VirtualUser"):CaptureController()
     game:GetService("VirtualUser"):ClickButton1(Vector2.new())
@@ -64,32 +63,27 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
-
 TextButton.MouseButton1Click:Connect(function()
     game:GetService("VirtualInputManager"):SendKeyEvent(true, "Minus", false, game)
     game:GetService("VirtualInputManager"):SendKeyEvent(false, "Minus", false, game)
 end)
 end
-
 ESP:Toggle(true)
 ESP.Tracers = false
 ESP.Names = false
 ESP.Boxes = false
 ESP.Players = false
 ESP.Color = Color3.fromRGB(255, 255, 255)
-
-    -- Fluent Window and Tabs
-    local Window = Fluent:CreateWindow({
-        Title = "Beamed v2 Fluent version",
-        SubTitle = "Made by Ben1x1x1x1x",
-        TabWidth = 160,
-        Size = UDim2.fromOffset(500, 400),
-        Acrylic = true,
-        Theme = "Dark",
-        MinimizeKey = Enum.KeyCode.Minus
-    })
-
- ---addtab
+local Window = Fluent:CreateWindow({
+    Title = tostring(game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name),
+    SubTitle = "Beamed V2 Fluent",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 400),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.Minus
+})
+---addtab
 local Tabs = {
     Main = Window:AddTab({
         Title = "Main",
@@ -144,7 +138,6 @@ local Tabs = {
         Icon = "settings"
     })
 }
-
 ---main
 local tool = Tabs.Main:AddDropdown("SelectTool Dropdown", {
     Title = "Select Tool",
