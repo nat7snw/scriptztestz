@@ -66,8 +66,8 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
 
 TextButton.MouseButton1Click:Connect(function()
-    game:GetService("VirtualInputManager"):SendKeyEvent(true, "RightControl", false, game)
-    game:GetService("VirtualInputManager"):SendKeyEvent(false, "RightControl", false, game)
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "Minus", false, game)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "Minus", false, game)
 end)
 end
 
@@ -83,10 +83,10 @@ ESP.Color = Color3.fromRGB(255, 255, 255)
         Title = "Beamed v2 Fluent version",
         SubTitle = "Made by Ben1x1x1x1x",
         TabWidth = 160,
-        Size = UDim2.fromOffset(500, 460),
+        Size = UDim2.fromOffset(500, 400),
         Acrylic = true,
         Theme = "Dark",
-        MinimizeKey = Enum.KeyCode.RightControl
+        MinimizeKey = Enum.KeyCode.Minus
     })
 
  ---addtab
