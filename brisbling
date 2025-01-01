@@ -51,8 +51,8 @@ end
 local Window = Library:CreateWindow{
     Title = "Beamed V2 Fluent",
     SubTitle = "by ben1x1x1x1x",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(450, 400),
+    TabWidth = 150,
+    Size = UDim2.fromOffset(1000, 1000),
     Resize = true,
     MinSize = Vector2.new(1470, 1380),
     Acrylic = true,
