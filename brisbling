@@ -1,3 +1,17 @@
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+    game:GetService("VirtualUser"):CaptureController()
+    game:GetService("VirtualUser"):ClickButton1(Vector2.new())
+    game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+end)
+if game.Workspace:FindFirstChild("KIllAllPart") then
+    game.Workspace.KIllAllPart:Destroy()
+end
+local part = Instance.new("Part")
+part.Parent = game.Workspace
+part.Name = "KIllAllPart"
+part.Position = Vector3.new(0, 10000, 0)
+part.Size = Vector3.new(1000, 10, 1000)
+part.Anchored = true
 -- Core Setup
 local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
 local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
