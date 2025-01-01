@@ -620,22 +620,25 @@ KillerToggle:OnChanged(function(Value)
 end)
 
 
-local Toggle = Tabs.Killer:AddToggle("MyToggle", {Title = "Auto Punch", Default = false })
+local Toggle = Tabs.Killer:AddToggle("AutoPunch", {Title = "Auto Punch", Default = false })
 
 -- Variable to track the auto punch loop
 local autoPunchActive = false
 
 Toggle:OnChanged(function()
-    autoPunchActive = Options.MyToggle.Value
+    autoPunchActive = Options.AutoPunch.Value
     if autoPunchActive then
         -- Start the auto punch loop
         task.spawn(function()
             while autoPunchActive do
-                -- Equip the Punch tool
+                -- Ensure the character and Punch tool exist
                 local player = game.Players.LocalPlayer
-                local tool = player.Backpack:FindFirstChild("Punch")
-                if tool then
-                    player.Character.Humanoid:EquipTool(tool)
+                local character = player.Character or player.CharacterAdded:Wait()
+                local tool = player.Backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+
+                -- Equip the Punch tool if found
+                if tool and not character:FindFirstChild("Punch") then
+                    character.Humanoid:EquipTool(tool)
                 end
 
                 -- Execute punch with right hand
@@ -652,14 +655,16 @@ Toggle:OnChanged(function()
                 }
                 player.muscleEvent:FireServer(unpack(argsLeft))
 
-                -- Wait for the next RenderStepped
-                game:GetService("RunService").RenderStepped:Wait()
+                -- Wait for the next Heartbeat
+                game:GetService("RunService").Heartbeat:Wait()
             end
         end)
     end
 end)
 
-Options.MyToggle:SetValue(false)
+Options.AutoPunch:SetValue(false)
+
+
 
 
 
