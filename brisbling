@@ -51,10 +51,8 @@ end
 local Window = Library:CreateWindow{
     Title = "Beamed V2 Fluent",
     SubTitle = "by ben1x1x1x1x",
-    TabWidth = 150,
-    Size = UDim2.fromOffset(1000, 1000),
-    Resize = true,
-    MinSize = Vector2.new(1470, 1380),
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 400),
     Acrylic = true,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.RightControl
@@ -625,7 +623,6 @@ KillDropdown:OnChanged(function(Value)
     end
 end)
 
-local KillerSection = Tabs.Killer:CreateSection("Kill Aurav2")
 
 -- kill aura v2 toggles 
 Tabs.Killer:AddToggle("Kill Player", {
