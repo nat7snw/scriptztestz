@@ -1,1 +1,532 @@
+-- Core Setup
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
+-- Services & Variables
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+_G.AutoKillActive = false
+_G.Whitelist = {}
+_G.SelectedPlayers = {}
+local TeleportCFrame = CFrame.new(338, 7497, 2208)
+local targetRebirthValue = 1
+
+-- Utility Functions
+local function findMachine(machineName)
+    local machine = workspace.machinesFolder:FindFirstChild(machineName)
+    if not machine then
+        for _, folder in pairs(workspace:GetChildren()) do
+            if folder:IsA("Folder") and folder.Name:find("machines") then
+                machine = folder:FindFirstChild(machineName)
+                if machine then break end
+            end
+        end
+    end
+    return machine
+end
+
+local function pressE()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "E", false, game)
+    task.wait(0.1)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "E", false, game)
+end
+
+local function teleportAboveMachine(machineName)
+    local machine = findMachine(machineName)
+    if machine and machine:FindFirstChild("interactSeat") then
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local seatCFrame = machine.interactSeat.CFrame
+            local teleportPosition = seatCFrame * CFrame.new(0, 10, 0)
+            character.HumanoidRootPart.CFrame = teleportPosition
+            return true
+        end
+    end
+    return false
+end
+
+-- Window Creation
+local Window = Library:CreateWindow{
+    Title = "Muscle Legends Hub",
+    SubTitle = "by Masterboy123",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(1330, 1225),
+    Resize = true,
+    MinSize = Vector2.new(1470, 1380),
+    Acrylic = true,
+    Theme = "Solarized Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+}
+
+-- Create Tabs
+local Tabs = {
+    Main = Window:CreateTab{
+        Title = "Main",
+        Icon = "home"
+    },
+    Rebirth = Window:CreateTab{
+        Title = "Rebirth",
+        Icon = "refresh-cw" 
+    },
+    AutoFarm = Window:CreateTab{
+        Title = "Auto Farm",
+        Icon = "dumbbell"
+    },
+    Killer = Window:CreateTab{
+        Title = "Killer",
+        Icon = "swords"
+    },
+    Whitelist = Window:CreateTab{
+        Title = "Whitelist",
+        Icon = "shield"
+    },
+    Crystals = Window:CreateTab{
+        Title = "Crystals", 
+        Icon = "gem"
+    },
+    Teleport = Window:CreateTab{
+        Title = "Teleport",
+        Icon = "map-pin"
+    },
+    Settings = Window:CreateTab{
+        Title = "Settings",
+        Icon = "settings"
+    }
+}
+
+-- Rebirth Tab
+local RebirthSection = Tabs.Rebirth:CreateSection("Auto Rebirth")
+
+local Input = Tabs.Rebirth:CreateInput("TargetRebirths", {
+    Title = "Target Rebirth",
+    Default = "1",
+    Placeholder = "Enter target rebirth amount",
+    Numeric = true,
+    Finished = true,
+    Callback = function(Value)
+        targetRebirthValue = tonumber(Value) or 1
+    end
+})
+
+local TargetToggle = Tabs.Rebirth:CreateToggle("AutoRebirthTarget", {
+    Title = "Auto Rebirths Until Target",
+    Default = false,
+    Callback = function(Value)
+        task.spawn(function()
+            while Value do
+                local currentRebirths = game.Players.LocalPlayer.leaderstats.Rebirths.Value
+                if currentRebirths >= targetRebirthValue then
+                    TargetToggle:SetValue(false)
+                    break
+                end
+                game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+local InfiniteToggle = Tabs.Rebirth:CreateToggle("AutoRebirthInfinite", {
+    Title = "Infinite Auto Rebirths",
+    Default = false,
+    Callback = function(Value)
+        task.spawn(function()
+            while Value do
+                game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+-- Auto Farm Section
+local workoutMachines = {
+    ["Legends Gym"] = {
+        "Legends Lift", "Legends Press", "Legends Pullup", "Legends Squat", "Legends Throw"
+    },
+    ["Frost Gym"] = {
+        "Frost Lift", "Frost Press", "Frost Pullup", "Frost Squat", "Frost Throw"
+    },
+    ["Mythical Gym"] = {
+        "Mythical Lift", "Mythical Press", "Mythical Pullup", "Mythical Squat", "Mythical Throw"
+    },
+    ["External Gym"] = {
+        "External Lift", "External Press", "External Pullup", "External Squat", "External Throw"
+    },
+    ["Muscle King Gym"] = {
+        "King Boulder", "Muscle King Lift", "Muscle King Bench", "Muscle King Squat"
+    }
+}
+
+-- Basic Workouts Section
+local BasicWorkouts = Tabs.AutoFarm:CreateSection("Basic Workouts")
+
+local BasicToggles = {
+    Weight = Tabs.AutoFarm:CreateToggle("AutoWeight", {
+        Title = "Auto Weight",
+        Default = false
+    }),
+    Pushups = Tabs.AutoFarm:CreateToggle("AutoPushups", {
+        Title = "Auto Pushups", 
+        Default = false
+    }),
+    Handstands = Tabs.AutoFarm:CreateToggle("AutoHandstands", {
+        Title = "Auto Handstands",
+        Default = false
+    }),
+    Situps = Tabs.AutoFarm:CreateToggle("AutoSitups", {
+        Title = "Auto Situps",
+        Default = false
+    })
+}
+
+for name, toggle in pairs(BasicToggles) do
+    toggle:OnChanged(function(Value)
+        if Value then
+            local tool = game.Players.LocalPlayer.Backpack:FindFirstChild(name)
+            if tool then
+                tool.Parent = game.Players.LocalPlayer.Character
+                spawn(function()
+                    while toggle.Value do
+                        game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+                        task.wait()
+                    end
+                end)
+            end
+        else
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local tool = character:FindFirstChild(name)
+                if tool then
+                    tool.Parent = game.Players.LocalPlayer.Backpack
+                end
+            end
+        end
+    end)
+end
+
+local function getAvailableMachines(gymName)
+    local availableMachines = {}
+    for _, machineName in ipairs(workoutMachines[gymName]) do
+        if findMachine(machineName) then
+            table.insert(availableMachines, machineName)
+        end
+    end
+    return availableMachines
+end
+
+local GymSection = Tabs.AutoFarm:CreateSection("Gym Machines")
+
+local GymDropdown = Tabs.AutoFarm:CreateDropdown("GymSelect", {
+    Title = "Select Gym",
+    Values = {
+        "Legends Gym",
+        "Frost Gym",
+        "Mythical Gym", 
+        "External Gym",
+        "Muscle King Gym"
+    },
+    Multi = false,
+    Default = 1
+})
+
+local WorkoutDropdown = Tabs.AutoFarm:CreateDropdown("WorkoutSelect", {
+    Title = "Select Workout",
+    Values = getAvailableMachines("Legends Gym"),
+    Multi = false,
+    Default = 1
+})
+
+GymDropdown:OnChanged(function()
+    local selectedGym = GymDropdown.Value
+    local availableMachines = getAvailableMachines(selectedGym)
+    WorkoutDropdown:SetValues(availableMachines)
+    if #availableMachines > 0 then
+        WorkoutDropdown:SetValue(availableMachines[1])
+    end
+end)
+
+local AutoWorkoutToggle = Tabs.AutoFarm:CreateToggle("AutoWorkout", {
+    Title = "Auto Workout",
+    Default = false
+})
+
+AutoWorkoutToggle:OnChanged(function()
+    if AutoWorkoutToggle.Value then
+        local selectedWorkout = WorkoutDropdown.Value
+        teleportAboveMachine(selectedWorkout)
+        task.wait(0.5)
+        pressE()
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if AutoWorkoutToggle.Value then
+            local selectedWorkout = WorkoutDropdown.Value
+            local machine = findMachine(selectedWorkout)
+            if machine and machine:FindFirstChild("interactSeat") then
+                game:GetService("Players").LocalPlayer.muscleEvent:FireServer(
+                    "rep",
+                    machine.interactSeat
+                )
+            end
+        end
+        if Library.Unloaded then break end
+    end
+end)
+
+-- Killer Functions
+local function equipPunch()
+    local backpack = LocalPlayer:WaitForChild("Backpack")
+    local punch = backpack:FindFirstChild("Punch")
+    if punch then
+        punch.Parent = LocalPlayer.Character
+    end
+end
+
+local function startAutoPunch()
+    task.spawn(function()
+        while _G.AutoKillActive do
+            if not LocalPlayer.Character:FindFirstChild("Punch") then
+                equipPunch()
+            end
+            local punchTool = LocalPlayer.Character:FindFirstChild("Punch")
+            if punchTool and punchTool.Enabled then
+                punchTool:Activate()
+            end
+            task.wait(0.1)
+        end
+    end)
+end
+
+local function GetPlayerList()
+    local playerList = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(playerList, player.Name)
+        end
+    end
+    return playerList
+end
+
+local function CreatePlatform()
+    local platform = Instance.new("Part")
+    platform.Size = Vector3.new(10, 1, 10)
+    platform.Position = Vector3.new(338, 7497, 2208)
+    platform.Anchored = true
+    platform.BrickColor = BrickColor.new("Really black")
+    platform.Transparency = 0.5
+    platform.Parent = workspace
+    return platform
+end
+
+local function AutoKillPlayers()
+    while _G.AutoKillActive do
+        task.wait()
+        for username, _ in pairs(_G.SelectedPlayers) do
+            if not _G.Whitelist[username] then
+                local player = Players:FindFirstChild(username)
+                if player and player.Character then
+                    local head = player.Character:FindFirstChild("Head")
+                    if head then
+                        head.Anchored = true
+                        head.CanCollide = false
+                        head:BreakJoints()
+                        head.Transparency = 1
+                        head.CFrame = LocalPlayer.Character.RightHand.CFrame
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Killer Section
+local KillerSection = Tabs.Killer:CreateSection("Kill Aura")
+
+local KillerToggle = Tabs.Killer:CreateToggle("KillAura", {
+    Title = "Kill Aura",
+    Default = false
+})
+
+KillerToggle:OnChanged(function(Value)
+    if Value then
+        spawn(function()
+            while KillerToggle.Value do
+                game:GetService("Players").LocalPlayer.muscleEvent:FireServer("punch","rightHand")
+                game:GetService("Players").LocalPlayer.muscleEvent:FireServer("punch","leftHand")
+                task.wait()
+            end
+        end)
+    end
+end)
+
+-- Auto Kill Section
+local AutoKillSection = Tabs.Killer:CreateSection("Auto Kill")
+
+local AutoKillToggle = Tabs.Killer:CreateToggle("AutoKill", {
+    Title = "Auto Kill Players",
+    Description = "Toggle auto-kill functionality",
+    Default = false
+})
+
+AutoKillToggle:OnChanged(function()
+    _G.AutoKillActive = AutoKillToggle.Value
+    if AutoKillToggle.Value then
+        local platform = CreatePlatform()
+        LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = TeleportCFrame
+        task.spawn(AutoKillPlayers)
+        startAutoPunch()
+    else
+        for _, part in pairs(workspace:GetChildren()) do
+            if part:IsA("Part") and part.Position == Vector3.new(338, 7497, 2208) then
+                part:Destroy()
+            end
+        end
+    end
+end)
+
+local KillDropdown = Tabs.Killer:CreateDropdown("KillPlayers", {
+    Title = "Select Targets",
+    Description = "Choose players to kill",
+    Values = GetPlayerList(),
+    Multi = true,
+    Default = {}
+})
+
+KillDropdown:OnChanged(function(Value)
+    _G.SelectedPlayers = Value
+end)
+
+-- Whitelist Section
+local WhitelistSection = Tabs.Whitelist:CreateSection("Player Whitelist")
+
+local WhitelistDropdown = Tabs.Whitelist:CreateDropdown("WhitelistPlayers", {
+    Title = "Whitelist Players",
+    Description = "Select players to protect",
+    Values = GetPlayerList(),
+    Multi = true,
+    Default = {}
+})
+
+WhitelistDropdown:OnChanged(function(Value)
+    _G.Whitelist = Value
+end)
+
+-- Crystal Section
+local CrystalSection = Tabs.Crystals:CreateSection("Auto Crystal")
+
+local CrystalDropdown = Tabs.Crystals:CreateDropdown("CrystalSelect", {
+    Title = "Select Crystal",
+    Values = {
+        "Blue Crystal",
+        "Green Crystal", 
+        "Frost Crystal",
+        "Mythical Crystal",
+        "Inferno Crystal",
+        "Legends Crystal",
+        "Muscle Elite Crystal",
+        "Galaxy Oracle Crystal"
+    },
+    Default = "Blue Crystal"
+})
+
+local CrystalToggle = Tabs.Crystals:CreateToggle("AutoCrystal", {
+    Title = "Auto Open Crystal",
+    Default = false
+})
+
+CrystalToggle:OnChanged(function(Value)
+    if Value then
+        spawn(function()
+            while CrystalToggle.Value do
+                game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(
+                    "openCrystal",
+                    CrystalDropdown.Value
+                )
+                task.wait()
+            end
+        end)
+    end
+end)
+
+-- Teleport Section
+local TeleportSection = Tabs.Teleport:CreateSection("Locations")
+
+local TeleportDropdown = Tabs.Teleport:CreateDropdown("TeleportSelect", {
+    Title = "Select Location",
+    Values = {
+        "Tiny Gym",
+        "Beach Gym",
+        "Frost Gym", 
+        "Mythic Gym",
+        "Inferno Gym",
+        "Legends Gym",
+        "Muscle King Gym"
+    },
+    Default = "Beach Gym",
+    Callback = function(Value)
+        local locations = {
+            ["Tiny Gym"] = Vector3.new(-42, 7, 1892),
+            ["Beach Gym"] = Vector3.new(30, 7, 76),
+            ["Frost Gym"] = Vector3.new(-2623, 7, -409),
+            ["Mythic Gym"] = Vector3.new(2250, 7, 1073),
+            ["Inferno Gym"] = Vector3.new(-6758, 7, -1284),
+            ["Legends Gym"] = Vector3.new(4603, 991, -3897),
+            ["Muscle King Gym"] = Vector3.new(-8625, 17, -5730)
+        }
+        
+        local character = game.Players.LocalPlayer.Character
+        if character and locations[Value] then
+            character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(locations[Value])
+        end
+    end
+})
+
+-- Refresh Buttons
+Tabs.Killer:CreateButton{
+    Title = "Refresh Players",
+    Description = "Update player list",
+    Callback = function()
+        KillDropdown:SetValues(GetPlayerList())
+    end
+}
+
+Tabs.Whitelist:CreateButton{
+    Title = "Refresh Whitelist",
+    Description = "Update whitelist players",
+    Callback = function()
+        WhitelistDropdown:SetValues(GetPlayerList())
+    end
+}
+
+-- Character Respawn Handler
+LocalPlayer.CharacterAdded:Connect(function()
+    if _G.AutoKillActive then
+        task.wait(0.5)
+        equipPunch()
+        LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = TeleportCFrame
+    end
+end)
+
+-- Settings Setup
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetFolder("MuscleLegends/Config")
+InterfaceManager:SetFolder("MuscleLegends/Config")
+
+SaveManager:BuildConfigSection(Tabs.Settings)
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+
+Window:SelectTab(1)
+SaveManager:LoadAutoloadConfig()
+
+Library:Notify{
+    Title = "Script Loaded",
+    Content = "Muscle Legends Hub is ready!",
+    Duration = 5
+}
